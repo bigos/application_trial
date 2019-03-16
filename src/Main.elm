@@ -1,23 +1,25 @@
-module Main exposing (Flags(..), Model, Msg(..), Note, init, main, subscriptions, update, view)
+module Main exposing (Model, Msg(..), init, main, subscriptions, update, view, viewLink)
 
-import Browser exposing (..)
+import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (..)
-import Http
-import Json.Decode as D exposing (..)
 import Url
 
 
+
+-- MAIN
+
+
+main : Program () Model Msg
 main =
     Browser.application
         { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
         , onUrlChange = UrlChanged
         , onUrlRequest = LinkClicked
-        , subscriptions = subscriptions
-        , update = update
-        , view = view
         }
 
 
@@ -26,30 +28,14 @@ main =
 
 
 type alias Model =
-    { message : String
-    , code : Int
+    { key : Nav.Key
+    , url : Url.Url
     }
 
 
-type Flags
-    = Int
-
-
-type alias Note =
-    { id : Int
-    , author : String
-    , content : String
-    , created_at : String
-    , updated_at : String
-    }
-
-
-init _ url navkey =
-    ( { message = "Hi"
-      , code = 0
-      }
-    , Cmd.none
-    )
+init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
+init flags url key =
+    ( Model key url, Cmd.none )
 
 
 
@@ -57,26 +43,25 @@ init _ url navkey =
 
 
 type Msg
-    = Reset
+    = LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
-    | LinkClicked UrlRequest
 
 
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Reset ->
-            ( model, Cmd.none )
-
-        UrlChanged _ ->
-            ( model, Cmd.none )
-
         LinkClicked urlRequest ->
             case urlRequest of
-                Internal url ->
-                    ( model, Cmd.none )
+                Browser.Internal url ->
+                    ( model, Nav.pushUrl model.key (Url.toString url) )
 
-                External href ->
-                    ( model, Cmd.none )
+                Browser.External href ->
+                    ( model, Nav.load href )
+
+        UrlChanged url ->
+            ( { model | url = url }
+            , Cmd.none
+            )
 
 
 
@@ -84,7 +69,7 @@ update msg model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.none
 
 
@@ -92,6 +77,23 @@ subscriptions model =
 -- VIEW
 
 
-view : model -> Document msg
+view : Model -> Browser.Document Msg
 view model =
-    { title = "New title", body = [] }
+    { title = "URL Interceptor"
+    , body =
+        [ text "The current URL is: "
+        , b [] [ text (Url.toString model.url) ]
+        , ul []
+            [ viewLink "/home"
+            , viewLink "/profile"
+            , viewLink "/reviews/the-century-of-the-self"
+            , viewLink "/reviews/public-opinion"
+            , viewLink "/reviews/shah-of-shahs"
+            ]
+        ]
+    }
+
+
+viewLink : String -> Html msg
+viewLink path =
+    li [] [ a [ href path ] [ text path ] ]
