@@ -1,0 +1,5 @@
+* Compilation
+
+#+BEGIN_EXAMPLE
+elm make ./src/Main.elm  --output=main.html
+#+END_EXAMPLE
