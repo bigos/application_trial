@@ -13,6 +13,7 @@ import Url
 
 main : Program () Model Msg
 main =
+    -- it worked with the elm reactor, it needs some kind of server
     Browser.application
         { init = init
         , view = view
@@ -86,9 +87,6 @@ view model =
         , ul []
             [ viewLink "/home"
             , viewLink "/profile"
-            , viewLink "/reviews/the-century-of-the-self"
-            , viewLink "/reviews/public-opinion"
-            , viewLink "/reviews/shah-of-shahs"
             ]
         ]
     }
