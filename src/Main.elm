@@ -49,7 +49,7 @@ type alias Note =
 type Status
     = Failure
     | Loading
-    | Success String
+    | Success (List Note)
 
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )

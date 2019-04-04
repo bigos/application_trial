@@ -15,7 +15,7 @@ or
 
 #+BEGIN_EXAMPLE
 elm make ./src/Main.elm  --output=main.js
-cp ./main.js ~/code/asb_apps_rec/public/main.js
+cp ./main.js ~/Programming/Rails/asb_test/public/main.js
 #+END_EXAMPLE
 *** header
 
