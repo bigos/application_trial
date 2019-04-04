@@ -90,6 +90,11 @@ update msg model =
             ( { model | status = Loading }, getNotes )
 
         GotNotes result ->
+            let
+                foo =
+                    Debug.log (Debug.toString result)
+                        1
+            in
             case result of
                 Ok url ->
                     ( { model | status = Success url }, Cmd.none )
