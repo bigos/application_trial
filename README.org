@@ -29,3 +29,9 @@ cp ./main.js ~/code/asb_apps_rec/public/main.js
   var app = Elm.Main.init();
 
 #+END_EXAMPLE
+
+*** routes
+#+BEGIN_EXAMPLE
+  get 'spa/*index', to: 'spa#index'
+  get 'spa/', to: 'spa#index'
+#+END_EXAMPLE
