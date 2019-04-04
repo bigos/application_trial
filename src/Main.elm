@@ -139,7 +139,7 @@ viewLink path =
 
 getNotes =
     Http.get
-        { url = "http://localhost:3000/spapi/notes"
+        { url = "http://localhost:3000/spapi/notes.json"
         , expect = Http.expectJson GotNotes notesDecoder
         }
 
