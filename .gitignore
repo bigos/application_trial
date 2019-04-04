@@ -2,3 +2,5 @@ elm-stuff/
 
 # ignore elm generated html files
 *.html
+
+main.js
