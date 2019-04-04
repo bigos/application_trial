@@ -4,6 +4,9 @@ import Browser
 import Browser.Navigation as Nav
 import Html exposing (..)
 import Html.Attributes exposing (..)
+import Html.Events exposing (..)
+import Http
+import Json.Decode exposing (..)
 import Url
 
 
@@ -31,12 +34,29 @@ main =
 type alias Model =
     { key : Nav.Key
     , url : Url.Url
+    , status : Status
     }
+
+
+type alias Note =
+    { id : Int
+
+    -- person_id : Int
+    , authorisation_id : Int
+    }
+
+
+type Status
+    = Failure
+    | Loading
+    | Success String
 
 
 init : () -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
-    ( Model key url, Cmd.none )
+    ( Model key url Loading
+    , Cmd.none
+    )
 
 
 
@@ -46,6 +66,8 @@ init flags url key =
 type Msg
     = LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
+    | MoreNotes
+    | GotNotes (Result Http.Error String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -64,6 +86,17 @@ update msg model =
             , Cmd.none
             )
 
+        MoreNotes ->
+            ( { model | status = Loading }, getNotes )
+
+        GotNotes result ->
+            case result of
+                Ok url ->
+                    ( { model | status = Success url }, Cmd.none )
+
+                Err _ ->
+                    ( { model | status = Failure }, Cmd.none )
+
 
 
 -- SUBSCRIPTIONS
@@ -80,14 +113,16 @@ subscriptions _ =
 
 view : Model -> Browser.Document Msg
 view model =
-    { title = "URL Interceptor"
+    { title = "URL Interceptor Experiment"
     , body =
         [ text "The current URL is: "
         , b [] [ text (Url.toString model.url) ]
         , ul []
-            [ viewLink "/home"
-            , viewLink "/profile"
+            [ viewLink "/spa/home"
+            , viewLink "/spa/profile"
             ]
+        , button [ onClick MoreNotes, style "display" "block" ] [ text "More Notes!" ]
+        , div [] [ text (Debug.toString model) ]
         ]
     }
 
@@ -95,3 +130,20 @@ view model =
 viewLink : String -> Html msg
 viewLink path =
     li [] [ a [ href path ] [ text path ] ]
+
+
+getNotes =
+    Http.get
+        { url = "http://spapi/notes"
+        , expect = Http.expectJson GotNotes notesDecoder
+        }
+
+
+notesDecoder =
+    Json.Decode.list noteDecoder
+
+
+noteDecoder =
+    map2 Note
+        (field "id" int)
+        (field "authorisation_id" int)
