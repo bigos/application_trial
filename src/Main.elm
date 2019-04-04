@@ -67,7 +67,7 @@ type Msg
     = LinkClicked Browser.UrlRequest
     | UrlChanged Url.Url
     | MoreNotes
-    | GotNotes (Result Http.Error String)
+    | GotNotes (Result Http.Error (List Note))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
