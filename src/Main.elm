@@ -40,9 +40,9 @@ type alias Model =
 
 type alias Note =
     { id : Int
-
-    -- person_id : Int
+    , person_id : Int
     , authorisation_id : Int
+    , content : String
     }
 
 
@@ -74,9 +74,25 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         LinkClicked urlRequest ->
+            let
+                boo =
+                    Debug.log (Debug.toString urlRequest)
+                        1
+            in
             case urlRequest of
                 Browser.Internal url ->
-                    ( model, Nav.pushUrl model.key (Url.toString url) )
+                    let
+                        urlStr =
+                            Url.toString url
+
+                        spaPage =
+                            String.startsWith "/spa/" urlStr
+                    in
+                    if spaPage then
+                        ( model, Nav.pushUrl model.key (Url.toString url) )
+
+                    else
+                        ( model, Nav.load urlStr )
 
                 Browser.External href ->
                     ( model, Nav.load href )
@@ -87,7 +103,7 @@ update msg model =
             )
 
         MoreNotes ->
-            ( { model | status = Loading }, getNotes )
+            ( { model | status = Loading }, getNotes model )
 
         GotNotes result ->
             let
@@ -123,7 +139,8 @@ view model =
         [ text "The current URL is: "
         , b [] [ text (Url.toString model.url) ]
         , ul []
-            [ viewLink "/spa/home"
+            [ li [] [ a [ href "/" ] [ text "Home" ] ]
+            , viewLink "/spa/home"
             , viewLink "/spa/profile"
             ]
         , button [ onClick MoreNotes, style "display" "block" ] [ text "More Notes!" ]
@@ -137,9 +154,21 @@ viewLink path =
     li [] [ a [ href path ] [ text path ] ]
 
 
-getNotes =
+getNotes model =
+    let
+        nurl =
+            "http://localhost:"
+                ++ (case model.url.port_ of
+                        Nothing ->
+                            ""
+
+                        Just p ->
+                            String.fromInt p
+                   )
+                ++ "/spapi/notes.json"
+    in
     Http.get
-        { url = "http://localhost:3000/spapi/notes.json"
+        { url = nurl
         , expect = Http.expectJson GotNotes notesDecoder
         }
 
@@ -149,6 +178,8 @@ notesDecoder =
 
 
 noteDecoder =
-    map2 Note
+    map4 Note
         (field "id" int)
+        (field "person_id" int)
         (field "authorisation_id" int)
+        (field "content" string)
