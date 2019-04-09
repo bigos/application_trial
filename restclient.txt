@@ -1,0 +1,3 @@
+# -*- restclient -*-
+
+GET http://localhost:3000/spapi/notes.json
