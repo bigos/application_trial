@@ -1,7 +1,7 @@
 # -*- restclient -*-
 
 # index 
-GET http://localhost:3000/spapi/notes.json
+GET http://localhost:3000/notes.json
 
 # single item
 GET http://localhost:3000/notes/3.json
