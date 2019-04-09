@@ -89,7 +89,11 @@ update msg model =
                             String.startsWith "/spa/" urlStr
                     in
                     if spaPage then
-                        ( model, Nav.pushUrl model.key (Url.toString url) )
+                        if String.startsWith "spa/notes" urlStr then
+                            ( model, Nav.pushUrl model.key (Url.toString url) )
+
+                        else
+                            ( model, Nav.pushUrl model.key (Url.toString url) )
 
                     else
                         ( model, Nav.load urlStr )
